@@ -121,6 +121,10 @@ def inline_tts(update: Update, context: CallbackContext):
                         caption=f"{voice['displayname']} says... {query}",
                     )
                 )
+        else:
+            logger.log(logging.WARN, f"Could not fetch audio for {voice['displayname']}, status code {r.status_code}: {r.text}")
+    if len(results) == 0:
+        logger.log(logging.ERROR, "Could not fetch any audio for {query}")
     context.bot.answer_inline_query(update.inline_query.id, results)
 
 
