@@ -66,7 +66,7 @@ def inline_tts(update: Update, context: CallbackContext):
                 InlineQueryResultAudio(id=str(uuid4()),
                 title=query,
                 audio_url=sammp3_url,
-                audio_duration=samwav.duration_seconds,
+                audio_duration=f'{samwav.duration_seconds:.0f}',
                 caption=f"MS Sam says... {query}")
             ]
             context.bot.answer_inline_query(update.inline_query.id, results)
