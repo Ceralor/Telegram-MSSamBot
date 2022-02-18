@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import requests, logging
 
-from telegram import InlineQueryResultArticle, InlineQueryResultAudio, Update, InputMediaAudio, InputMessageContent
+from telegram import InlineQueryResultArticle, InlineQueryResultVoice, Update, InputMediaAudio, InputMessageContent
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, CallbackContext, InlineQueryHandler
 from uuid import uuid4
 from pydub import AudioSegment
@@ -55,18 +55,18 @@ def inline_tts(update: Update, context: CallbackContext):
     if r.status_code == 200:
         logger.log(logging.INFO, f"Converting audio from URL: {r.url}")
         samwav = AudioSegment.from_wav(BytesIO(r.content))
-        sammp3 = BytesIO()
-        samwav.export(sammp3, format="mp3", tags={'title':'Sam Says...', 'artist':'@mssambot'})
+        samogg = BytesIO()
+        samwav.export(samogg, format="ogg")
         fileid = str(uuid4())
-        response = s3client.put_object(Bucket=s3bucket, Key=f"{fileid}.mp3", Body=sammp3, ACL='public-read', ContentType="audio/mpeg")
+        response = s3client.put_object(Bucket=s3bucket, Key=f"{fileid}", Body=samogg, ACL='public-read', ContentType="audio/mpeg")
         if response['ResponseMetadata']['HTTPStatusCode'] == 200:
-            sammp3_url = f"{s3conf['endpoint_url']}/{s3bucket}/{fileid}.mp3"
-            logger.log(logging.INFO,sammp3_url)
+            samogg_url = f"{s3conf['endpoint_url']}/{s3bucket}/{fileid}"
+            logger.log(logging.INFO,samogg_url)
             results = [
-                InlineQueryResultAudio(id=str(uuid4()),
+                InlineQueryResultVoice(id=fileid,
                 title=query,
-                audio_url=sammp3_url,
-                audio_duration=round(len(samwav)/1000),
+                voice_url=samogg_url,
+                voice_duration=round(len(samwav)/1000),
                 caption=f"MS Sam says... {query}")
             ]
             context.bot.answer_inline_query(update.inline_query.id, results)
