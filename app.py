@@ -86,6 +86,7 @@ def inline_tts(update: Update, context: CallbackContext):
     if len(query) > 1000:
         return
     results = []
+    logger.log(logging.INFO, f"User {update.inline_query.from_user.full_name} requested: {query}")
     for voice in voice_options:
         param_dict = {
             "voice": voice["voice"],
@@ -110,7 +111,7 @@ def inline_tts(update: Update, context: CallbackContext):
             )
             if response["ResponseMetadata"]["HTTPStatusCode"] == 200:
                 voiceogg_url = f"{s3conf['endpoint_url']}/{s3bucket}/{fileid}"
-                logger.log(logging.INFO, voiceogg_url)
+                #logger.log(logging.INFO, voiceogg_url)
                 results.append(
                     InlineQueryResultVoice(
                         id=fileid,
