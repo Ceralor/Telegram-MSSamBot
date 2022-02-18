@@ -86,7 +86,7 @@ def inline_tts(update: Update, context: CallbackContext):
     if len(query) > 1000:
         return
     results = []
-    logger.log(logging.INFO, f"User {update.inline_query.from_user.full_name} requested: {query}")
+    logger.log(logging.INFO, f"User @{update.inline_query.from_user.username}: requested: {query}")
     for voice in voice_options:
         param_dict = {
             "voice": voice["voice"],
@@ -97,7 +97,7 @@ def inline_tts(update: Update, context: CallbackContext):
         prep_params = urlencode(param_dict, quote_via=urlquote)
         r = requests.get(sapi4_api_url, params=prep_params)
         if r.status_code == 200:
-            logger.log(logging.INFO, f"Converting audio from URL: {r.url}")
+            logger.log(logging.INFO, f"User @{update.inline_query.from_user.username}: Converting audio from URL: {r.url}")
             voicewav = AudioSegment.from_wav(BytesIO(r.content))
             voiceogg = BytesIO()
             voicewav.export(voiceogg, format="opus")
@@ -122,12 +122,15 @@ def inline_tts(update: Update, context: CallbackContext):
                     )
                 )
         else:
-            logger.log(logging.WARN, f"Could not fetch audio for {voice['displayname']}, status code {r.status_code}: {r.text}")
+            logger.log(logging.WARN, f"User @{update.inline_query.from_user.username}: Could not fetch audio for {voice['displayname']}, status code {r.status_code}: {r.text}")
     if len(results) == 0:
-        logger.log(logging.ERROR, "Could not fetch any audio for {query}")
+        logger.log(logging.ERROR, "User @{update.inline_query.from_user.username}: Could not fetch any audio for {query}")
     context.bot.answer_inline_query(update.inline_query.id, results)
-
-
 inline_tts_handler = InlineQueryHandler(inline_tts)
 dispatcher.add_handler(inline_tts_handler)
+
+def errors(update: Update, context: CallbackContext):
+    logger.log(logging.ERROR, f"User @{update.effective_user.username}: {context.error.args}")
+dispatcher.add_error_handler(errors)
+
 updater.start_polling()
