@@ -56,7 +56,7 @@ def inline_tts(update: Update, context: CallbackContext):
         logger.log(logging.INFO, f"Converting audio from URL: {r.url}")
         samwav = AudioSegment.from_wav(BytesIO(r.content))
         samogg = BytesIO()
-        samwav.export(samogg, format="libopus")
+        samwav.export(samogg, format="opus")
         fileid = str(uuid4())
         response = s3client.put_object(Bucket=s3bucket, Key=f"{fileid}", Body=samogg, ACL='public-read', ContentType="audio/ogg")
         if response['ResponseMetadata']['HTTPStatusCode'] == 200:
