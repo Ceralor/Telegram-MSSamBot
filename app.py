@@ -56,7 +56,7 @@ def inline_tts(update: Update, context: CallbackContext):
         logger.log(logging.INFO, f"Converting audio from URL: {r.url}")
         samwav = AudioSegment.from_wav(BytesIO(r.content))
         sammp3 = BytesIO()
-        samwav.export(sammp3, format="mp3", tags={'title':query})
+        samwav.export(sammp3, format="mp3", tags={'title':'Sam Says...', 'artist':'@mssambot'})
         fileid = str(uuid4())
         response = s3client.put_object(Bucket=s3bucket, Key=f"{fileid}.mp3", Body=sammp3, ACL='public-read', ContentType="audio/mpeg")
         if response['ResponseMetadata']['HTTPStatusCode'] == 200:
@@ -66,7 +66,8 @@ def inline_tts(update: Update, context: CallbackContext):
                 InlineQueryResultAudio(id=str(uuid4()),
                 title=query,
                 audio_url=sammp3_url,
-                caption="MS Sam says...")
+                audio_duration=str(len(samwav)),
+                caption=f"MS Sam says... {query}")
             ]
             context.bot.answer_inline_query(update.inline_query.id, results)
 
