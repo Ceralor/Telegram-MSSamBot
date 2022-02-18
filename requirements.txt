@@ -1,0 +1,4 @@
+boto3<2.0
+python-telegram-bot<14.0
+pydub<1.0
+requests<3.0
